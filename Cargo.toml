@@ -3,3 +3,14 @@ name = "web-server"
 version = "0.1.0"
 edition = "2021"
 readme = "README.md"
+
+[workspace]
+members = ["server", "client"]
+
+[[bin]]
+name = "server"
+path = "server/src/server.rs"
+
+[[bin]]
+name = "client"
+path = "client/src/main.rs"

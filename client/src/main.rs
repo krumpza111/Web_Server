@@ -1,10 +1,8 @@
-mod server;
 use std::{
     io::{prelude::*, BufReader, BufRead},
     net::{TcpStream},
     process::{Command},
     fs,
-    fs::{File},
     env,
 };
 
@@ -44,6 +42,7 @@ fn main() {
             // Grabs html content and writes it to the temporary file
             let mut html_content = String::new();
             reader.read_to_string(&mut html_content).expect("Failed to read html content");
+            //println!("Content: {}", html_content);
             fs::write(&file_path, html_content).expect("Failed to write content to the file");
 
             // Makes the PATH into a string and opens in browser
@@ -58,7 +57,7 @@ fn main() {
 
 // A function which takes a path as a string and opens the html page in a browser
 fn open_in_browser(path: &str) {
-    println!("entered function open in browser");
+    println!("Opening in browser... ");
     if cfg!(target_os = "windows") {
         Command::new("cmd").args(["/C", "start", path]).spawn().expect("Failed to open html page");
     } else if cfg!(target_os = "macos") {
