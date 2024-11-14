@@ -6,7 +6,7 @@ use std::{
     env,
 };
 
-
+// Default HOST and PORT settings
 const HOST: &str = "127.0.0.1";
 const PORT: u16 = 7876;
 
