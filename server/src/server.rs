@@ -8,21 +8,28 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use url::form_urlencoded;
 
+// Default HOST and PORT settings
 const HOST: &str = "127.0.0.1";
 const PORT: u16 = 7876;
 
+// Struct representing JSON form data accepting a user name and email
 #[derive(Serialize, Deserialize, Debug)] 
 struct FormData {
     name: String,
     email: String,
 }
 
+// Thread to handle parrallel client requests
 fn handle_client(mut stream: TcpStream) {
-    // Reads data stream into buffer
-    let mut buf = [0; 2048];
-    let mut request = String::new();
-    let mut body = String::new();
+    let mut buf = [0; 2048]; // Buffer for reading data stream
+    let mut request = String::new(); // String storing the request header
+    let mut body = String::new(); // String storing the data of the request
 
+    /* 
+    Reads data from the stream, chunks that data and pushes it to the request string
+    If a end of header line is encountered we read the rest of the data into the body
+    This should parse the entire request message. A later check will read the body again if missed.
+    */
     while let Ok(bytes_read) = stream.read(&mut buf) {
         if bytes_read == 0 {
             println!("Request data is empty");
@@ -31,7 +38,7 @@ fn handle_client(mut stream: TcpStream) {
         let chunk = String::from_utf8_lossy(&buf[..bytes_read]);
         request.push_str(&chunk);
 
-        if request.contains("\r\n\r\n") { // end of headers
+        if request.contains("\r\n\r\n") { // end of headers encountered
             let headers_end = request.find("\r\n\r\n").unwrap();
             body = request[headers_end + 4..].to_string();
             break;
@@ -39,8 +46,9 @@ fn handle_client(mut stream: TcpStream) {
     }
 
     println!("Request: {}", request);
+    // Start of code chunk handling the request
     if request.starts_with("POST") {
-        println!("Entered the POST section of the code");
+        // Parses the request and 
         if let Some(content_length) = request
                 .lines()
                 .find(|line| line.to_lowercase().starts_with("content-length"))
@@ -52,13 +60,13 @@ fn handle_client(mut stream: TcpStream) {
                 body.push_str(&String::from_utf8_lossy(&buf[..bytes_read]));
             }
              
-
+            // uses urlencoeded to get the form data (JSON) from the body
             let form_data: FormData = form_urlencoded::parse(body.as_bytes())
                 .into_owned()
                 .fold(FormData {
                     name: String::new(),
                     email: String::new(),
-                }, |mut acc, (key, val)| {
+                }, |mut acc, (key, val)| { // matching JSON to form data
                     match key.as_ref() {
                         "name" => acc.name = val.to_string(),
                         "email" => acc.email = val.to_string(),
@@ -104,6 +112,7 @@ fn handle_client(mut stream: TcpStream) {
    
 }
 
+// Main function for setting up connection socket and waiting for connection
 fn main() {
     let listener = TcpListener::bind((HOST, PORT)).expect("Failed to connect");
     println!("Ready to serve... ");

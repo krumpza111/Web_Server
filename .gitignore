@@ -1,4 +1,11 @@
 /target
 zsh-syntax-highlighting
-.DS_STORE
+.DS_Store
+
+/server
+zsh-syntax-highlighting
+.DS_Store
+
+/client
+zsh-syntax-highlighting
 .DS_Store
